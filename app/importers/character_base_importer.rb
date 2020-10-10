@@ -8,21 +8,51 @@ class CharacterBaseImporter
   end
 
   def import
+    refresh_character_access_token
+
+    configure_esi_middlewares
+
     ActiveRecord::Base.transaction do
-      update!
+      import!
     end
   rescue EveOnline::Exceptions::ResourceNotFound
     Rails.logger.info("WARNING: ESI response with 404 (NOT FOUND) for Character with ID #{character_id}")
   rescue ActiveRecord::RecordNotFound
     Rails.logger.info("Character with ID #{character_id} not found")
+  rescue CharacterInvalidToken
+    Rails.logger.info("Invalid character token for Character with ID #{character_id}")
   end
+
+  private
 
   def character
     @character ||= Character.lock.find_by!(character_id: character_id)
   end
 
-  def update!
+  def import!
     raise NotImplementedError
+  end
+
+  def esi
+    raise NotImplementedError
+  end
+
+  def configure_esi_middlewares
+    before_middlewares = [EveOnline::Middlewares::CoolDown]
+
+    before_middlewares.each do |middleware|
+      middleware_instance = middleware.new(esi)
+
+      esi.add_before_middleware(middleware_instance)
+    end
+
+    after_middlewares = [EveOnline::Middlewares::UpdateRedisStats]
+
+    after_middlewares.each do |middleware|
+      middleware_instance = middleware.new(esi)
+
+      esi.add_after_middleware(middleware_instance)
+    end
   end
 
   def refresh_character_access_token
