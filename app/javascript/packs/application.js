@@ -12,26 +12,21 @@ Sentry.init({
   dsn: "https://185a236f4b994411a9f33c3c714cb34e@sentry.io/1424888",
 });
 
-require("@rails/ujs").start();
-require("turbolinks").start();
 require("channels");
+
+import { Turbo, cable } from "@hotwired/turbo-rails";
 
 import "bootstrap";
 
 import "../stylesheets/application";
 
 import ApexCharts from "apexcharts";
-import Vue from "vue/dist/vue";
-import vSelect from "vue-select";
 import * as timeago from "timeago.js";
 import debounce from "lodash.debounce";
 
 window.ApexCharts = ApexCharts;
 window.$ = $;
-window.Vue = Vue;
 window.debounce = debounce;
-
-Vue.component("v-select", vSelect);
 
 // Uncomment to copy all static images under ../images to the output folder and reference
 // them with the image_pack_tag helper in views (e.g <%= image_pack_tag 'rails.png' %>)
@@ -40,11 +35,11 @@ Vue.component("v-select", vSelect);
 // const images = require.context('../images', true)
 // const imagePath = (name) => images(name, true)
 
-document.addEventListener("turbolinks:load", () => {
+document.addEventListener("turbo:load", () => {
   $('[data-toggle="tooltip"]').tooltip();
 });
 
-document.addEventListener("turbolinks:load", () => {
+document.addEventListener("turbo:load", () => {
   const nodes = document.querySelectorAll(".timeago");
 
   if (nodes.length > 0) {
@@ -52,4 +47,4 @@ document.addEventListener("turbolinks:load", () => {
   }
 });
 
-import "controllers";
+// import "controllers";
